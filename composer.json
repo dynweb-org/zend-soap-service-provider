@@ -1,5 +1,5 @@
 {
-    "name": "ibsciss/zend-soap-service-provider",
+    "name": "dynweb/zend-soap-service-provider",
     "description": "A soap service provider, based on ZendSoap from ZendFramwork project.",
     "keywords": ["silex", "zend", "soap", "zendsoap", "zend-soap", "service provider", "service-provider", "framework"],
     "license": "MIT",
@@ -20,8 +20,8 @@
         }
     ],
     "support": {
-        "email": "community@ibsciss.com",
-        "issues" : "https://github.com/Ibsciss/zend-soap-service-provider/issues"
+        "email": "office@dynweb.org",
+        "issues" : "https://github.com/dynweb-org/zend-soap-service-provider/issues"
     },
     "require": {
         "zendframework/zend-soap": "~2.2",
