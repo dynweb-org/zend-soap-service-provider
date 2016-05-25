@@ -13,6 +13,10 @@
         {
             "name": "Arnaud LEMAIRE",
             "email" : "alemaire@ibsciss.com"
+        },
+        {
+            "name": "Bogdan SOOS",
+            "email" : "bogdan.soos@dynweb.org"
         }
     ],
     "support": {
@@ -21,7 +25,7 @@
     },
     "require": {
         "zendframework/zend-soap": "~2.2",
-        "silex/silex": "~1.1"
+        "silex/silex": "~2.0"
     },
     "require-dev": {
         "satooshi/php-coveralls": "dev-master"
