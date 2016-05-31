@@ -18,7 +18,7 @@ For more informations about Zend Soap, check the Zend Framework documentation :
 
 ##Install
 
-1. Add `"ibsciss/zend-soap-service-provider": "dev-master"` in the require section of your `composer.json` and run the `composer install` command.
+1. Add `"dynweb/zend-soap-service-provider": "dev-master"` in the require section of your `composer.json` and run the `composer install` command.
 2. Register service : `$app->register(new ZendSoapServiceProvider());` and don't forget the `use \Ibsciss\Silex\Provider\ZendSoapServiceProvider` statement.
 
 ##Usages

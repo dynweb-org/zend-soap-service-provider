@@ -1,14 +1,15 @@
 <?php
 namespace Ibsciss\Silex\Provider;
 
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use Silex\Application;
-use Silex\ServiceProviderInterface;
 
 use Zend\Soap;
 
 class ZendSoapServiceProvider implements ServiceProviderInterface
 {
-    public function register(Application $app)
+    public function register(Container $app)
     {
         //define options
         $app['soap.wsdl'] = (isset($app['soap.wsdl'])) ? $app['soap.wsdl'] : null;
@@ -19,73 +20,83 @@ class ZendSoapServiceProvider implements ServiceProviderInterface
         $app['soap.version'] = (isset($app['soap.version'])) ? $app['soap.version'] : null;
 
         //define shortcut
-        $app['soap.clients'] = $app->share(function($app){
+        $app['soap.clients'] = function ($app) {
             return $app['soap.instances.container']['clients'];
-        });
-        $app['soap.servers'] = $app->share(function($app){
+        };
+        $app['soap.servers'] = function ($app) {
             return $app['soap.instances.container']['servers'];
-        });
-        $app['soap.client'] = $app['zend_soap.client'] = $app->share(function($app){
+        };
+        $app['soap.client'] = $app['zend_soap.client'] = function ($app) {
             $clients = $app['soap.instances.container']['clients'];
+
             return $clients[$app['soap.instances.default']];
-        });
-        $app['soap.server'] = $app['zend_soap.server'] = $app->share(function($app){
+        };
+        $app['soap.server'] = $app['zend_soap.server'] = function ($app) {
             $servers = $app['soap.instances.container']['servers'];
+
             return $servers[$app['soap.instances.default']];
-        });
+        };
 
         //setup instances container
-        $app['soap.instances.container'] = $app->share(function($app){
+        $app['soap.instances.container'] = function ($app) {
 
-            $container_server = new \Pimple();
-            $container_client = new \Pimple();
+            $container_server = new \Pimple\Container();
+            $container_client = new \Pimple\Container();
 
-            if(!isset($app['soap.instances'])){
-                $app['soap.instances'] = array('default');
+            if (!isset($app['soap.instances'])) {
+                $app['soap.instances'] = ['default'];
             }
 
-            foreach($app['soap.instances'] as $name => $instanceConfig){
+            foreach ($app['soap.instances'] as $name => $instanceConfig) {
 
                 //php5.3 compatibility, see php.net/manual/en/function.isset.php#refsect1-function.isset-examples "isset on string offset"
-                if(!is_array($instanceConfig)){
+                if (!is_array($instanceConfig)) {
                     $name = $instanceConfig;
-                    $instanceConfig = array();
+                    $instanceConfig = [];
                 }
 
                 $wsdl = (isset($instanceConfig['wsdl'])) ? $instanceConfig['wsdl'] : $app['soap.wsdl'];
                 $version = (isset($instanceConfig['version'])) ? $instanceConfig['version'] : $app['soap.version'];
-                $options = array();
-                if(!is_null($version)) $options['soap_version'] = $version;
+                $options = [];
+                if (!is_null($version)) {
+                    $options['soap_version'] = $version;
+                }
 
-                $container_client[$name] = $container_client->share(function() use ($wsdl, $app, $instanceConfig, $options){
+                $container_client[$name] = function () use ($wsdl, $app, $instanceConfig, $options) {
                     //dotNet mode
-                    if($app['soap.dotNet'] || (isset($instanceConfig['dotNet']) && $instanceConfig['dotNet'])){
+                    if ($app['soap.dotNet'] || (isset($instanceConfig['dotNet']) && $instanceConfig['dotNet'])) {
                         $class = (isset($instanceConfig['client.dotNet.class'])) ? $instanceConfig['client.dotNet.class'] : $app['soap.client.dotNet.class'];
-                    }else{
+                    } else {
                         $class = (isset($instanceConfig['client.class'])) ? $instanceConfig['client.class'] : $app['soap.client.class'];
                     }
-                    return new $class($wsdl, $options);
-                });
 
-                $container_server[$name] = $container_server->share(function() use ($wsdl, $app, $instanceConfig, $options){
+                    return new $class($wsdl, $options);
+                };
+
+                $container_server[$name] = function () use ($wsdl, $app, $instanceConfig, $options) {
                     $serverClassName = (isset($instanceConfig['server.class'])) ? $instanceConfig['server.class'] : $app['soap.server.class'];
                     $server = new $serverClassName($wsdl, $options);
-                    if($app['debug']) $server->setDebugMode(true);
-                    return $server;
-                });
+                    if ($app['debug']) {
+                        $server->setDebugMode(true);
+                    }
 
-                if(!isset($app['soap.instances.default'])){
+                    return $server;
+                };
+
+                if (!isset($app['soap.instances.default'])) {
                     $app['soap.instances.default'] = $name;
                 }
             }
 
-            return array(
+            return [
                 'servers' => $container_server,
                 'clients' => $container_client
-            );
-        });
+            ];
+        };
 
     }
 
-    public function boot(Application $app){}
+    public function boot(Application $app)
+    {
+    }
 }
